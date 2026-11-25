@@ -1,0 +1,18 @@
+{
+  "model": "sentinel-mlp-6-8-1",
+  "hidden": 8,
+  "scale": 1000000,
+  "train_samples": 117450,
+  "test_samples": 43500,
+  "r2_test": 0.179,
+  "mae_test": 0.1429,
+  "event_precision_recall_at_6500": {
+    "event_rate_in_test": 0.0611,
+    "recall": 0.3499,
+    "false_alarm_rate_on_calm": 0.0119
+  },
+  "baseline_last_tick_minus_1pct": {
+    "recall": 0.2573,
+    "false_alarm_rate_on_calm": 0.006
+  }
+}

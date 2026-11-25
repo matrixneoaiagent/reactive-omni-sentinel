@@ -1,0 +1,22 @@
+# solidity / foundry
+out/
+cache/
+broadcast/
+
+# python
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# secrets and local state
+.env
+deploy/config.env
+agent/state.json
+agent/audit.jsonl
+
+# generated data (regenerate with training/generate_data.py)
+training/data.npz
+
+# os
+.DS_Store

@@ -1,0 +1,4 @@
+# Contract dependencies are vendored under lib/ for reproducible builds.
+# Recreate with:
+#   git clone --depth 1 https://github.com/Reactive-Network/reactive-lib-omni.git lib/reactive-lib-omni
+#   git clone --depth 1 https://github.com/foundry-rs/forge-std.git lib/forge-std
