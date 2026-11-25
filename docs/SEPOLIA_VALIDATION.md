@@ -110,11 +110,41 @@ The generated JSON contained:
 
 The JSON was removed after the test; only `deployments/.gitkeep` is committed.
 
-## 5. Not yet verified (requires a funded deploy)
+## 5. Orchestrator's live Sepolia deployment (read-only check, 2026-11-25 ~11:40 UTC)
 
+The orchestrator deployed while this validation was being written. The build subagent did not deploy or send any transaction; the values below were read from `deployments/latest.json` and the public RPCs.
+
+| Item | Value |
+|---|---|
+| Feed | `0x6F6f31D95c791aA3f7e61277E7e46Ff2BA3891D1` |
+| Vault | `0x58f839b80b37B11260a3018ae26cf3f1586A5CCf` |
+| Reactive | `0x098EED1eB26C11106A4f8329Db87f9bc988397AA` |
+| Feed deploy tx | `0xd434ac324f232d802e6a6a6397fb6f9a8daaa04d61e2cdb03cd46e08747e006a` (status 1, block 12208507) |
+| Vault deploy tx | `0xf617aa1b745de4ec4e59fb7c47fcb30651e6b6937f65ed96c7f5a52bd06b6587` (status 1, block 12208574) |
+| Reactive deploy tx | `0x9c69bd84193dd2191b6e71a25769196abbbde3d24ab878a53d0f056076229431` (status 1, Lasna block 9205909) |
+| `setVault` tx | `0xfd78f4bd7157bd0988340a59cbda6f630c924adf7b5e7168756a44578d7927de` (status 1) |
+| Fund reactive tx | `0xcd313840447f9eac01748fb77090ed54dcf40acf275435aff7d638caf21be06d` (status 1) |
+| Fund vault tx | `0x6dc1fb77a95f7f476326315bcf8014f520f29d3994a482a80ab0d9e3ed28ca54` (status 1) |
+| Model hash on vault | `0x671b59e6a51dddd6ef2900c996807258f1a783a58ceff12ed5fe538af3d403e9` |
+| `_SERVICE_PROVIDER` | `0xAa14d9Cd0f788Ca23d11805986C1d8bd035D23b4` |
+| Reserves | 0.5 lREACT on the reactive contract; 0.005 SepETH on the vault |
+
+Read-only checks confirmed:
+
+- `ORIGIN_CHAIN_ID() == 11155111`;
+- `PRICE_FEED()` and `vault()` match the deployment record;
+- `MODEL_HASH()` matches `training/model_hash.txt`;
+- the vault proxy is the official Ethereum Sepolia proxy;
+- the feed and vault have code, and the deployment transactions succeeded.
+
+At the time of the check the feed had `tickId = 10`, the reactive had observed 4 prices, the vault had `lastRequestId = 0`, and the mode was `NORMAL`. The callback loop had not completed yet; that is the next thing to observe.
+
+## 6. Not yet verified
+
+- A complete live origin → callback → agent → policy loop on the public deployment (the local Sepolia loop proves the code path; the public run is in progress).
 - Real Lasna `SYSTEM.requestCallbackV_1_0` delivery from a real Sepolia transaction.
 - Real Ethereum Sepolia callback proxy operator injection (the calldata shape was verified against a live Sepolia callback, and the local mock reproduces it).
 - Faucet claim (PoW mining) and actual Sepolia gas costs.
 - End-to-end latency with Sepolia's ~12 s blocks.
 
-These are the remaining risks before the funded deploy. The contract code, deploy script, chain IDs, proxy binding, subscription filters and auth path are covered by the tests above.
+The contract code, deploy script, chain IDs, proxy binding, subscription filters and auth path are covered by the tests above and by the live deployment's bindings.
