@@ -181,7 +181,7 @@ if [[ $DRY_RUN -eq 0 ]]; then
     || { echo "vault binding mismatch" >&2; exit 3; }
   [[ "$(cast call "$REACTIVE" 'PRICE_FEED()(address)' --rpc-url "$RPC_LASNA" | tr 'A-F' 'a-f')" == "$(echo "$FEED" | tr 'A-F' 'a-f')" ]] \
     || { echo "feed binding mismatch" >&2; exit 3; }
-  [[ "$(cast call "$REACTIVE" 'ORIGIN_CHAIN_ID()(uint256)' --rpc-url "$RPC_LASNA")" == "$ORIGIN_CHAIN_ID" ]] \
+  [[ "$(cast call "$REACTIVE" 'ORIGIN_CHAIN_ID()(uint256)' --rpc-url "$RPC_LASNA" --json | jq -r '.[0]')" == "$ORIGIN_CHAIN_ID" ]] \
     || { echo "origin chain binding mismatch" >&2; exit 3; }
   [[ "$(cast call "$VAULT" 'MODEL_HASH()(bytes32)' --rpc-url "$RPC_ORIGIN")" == "$(cat training/model_hash.txt)" ]] \
     || { echo "model hash mismatch" >&2; exit 3; }
@@ -200,14 +200,14 @@ OUT_FILE="deployments/${TS}.json"
 if [[ $DRY_RUN -eq 0 ]]; then
   jq -n \
     --arg ts "$TS" --arg owner "$OWNER" --argjson block "$FEED_BLOCK" \
-    --arg origin_chain "$ORIGIN_CHAIN" --argjson origin_chain_id "$ORIGIN_CHAIN_ID" --arg rpc_origin "$RPC_ORIGIN" \
+    --arg origin_chain "$ORIGIN_CHAIN" --argjson origin_chain_id "$ORIGIN_CHAIN_ID" --arg rpc_origin "$RPC_ORIGIN" --arg rpc_lasna "$RPC_LASNA" \
     --arg explorer "$EXPLORER" --arg proxy "$CALLBACK_PROXY" --arg faucet "$REACTIVE_FAUCET" \
     --arg feed "$FEED" --arg reactive "$REACTIVE" --arg vault "$VAULT" \
     --arg feed_tx "$FEED_TX" --arg reactive_tx "$REACTIVE_TX" --arg vault_tx "$VAULT_TX" \
     --arg set_vault_tx "$SET_VAULT_TX" --arg fund_react_tx "$FUND_REACT_TX" --arg fund_eth_tx "$FUND_ETH_TX" \
     --arg model "$(cat training/model_hash.txt)" \
     '{ts:$ts, block:$block, deployer:$owner,
-      origin_chain:$origin_chain, origin_chain_id:$origin_chain_id, rpc_origin:$rpc_origin,
+      origin_chain:$origin_chain, origin_chain_id:$origin_chain_id, rpc_origin:$rpc_origin, rpc_lasna:$rpc_lasna,
       explorer:$explorer, callback_proxy:$proxy, reactive_faucet:$faucet,
       chain_ids:{origin:$origin_chain_id, reactive:5318007},
       contracts:{price_feed:$feed, reactive:$reactive, vault:$vault},

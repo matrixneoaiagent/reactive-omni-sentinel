@@ -306,6 +306,7 @@ def main() -> None:
     args.rpc_url = (
         args.rpc_url
         or os.environ.get("RPC_ORIGIN")
+        or os.environ.get("RPC_BASE")
         or os.environ.get("RPC_URL")
         or "https://ethereum-sepolia-rpc.publicnode.com"
     )
@@ -334,6 +335,10 @@ def main() -> None:
         )
         return
 
+    if not args.vault:
+        deployment = Path("deployments/latest.json")
+        if deployment.exists():
+            args.vault = json.loads(deployment.read_text())["contracts"]["vault"]
     if not args.vault:
         raise SystemExit("VAULT_ADDRESS (or --vault) is required")
 

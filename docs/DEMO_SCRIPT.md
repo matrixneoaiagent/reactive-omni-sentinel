@@ -32,7 +32,7 @@ Kill background noise, hide notifications, clear the terminal, set `PS1='$ '`.
 
 **On screen:** scroll the diagram; highlight Ethereum Sepolia → Lasna → Ethereum Sepolia.
 
-**Voice:** "A price event on Ethereum Sepolia wakes a reactive contract on Lasna. It turns the last eight ticks into six features and asks for an assessment. The agent answers with a score. The reactive contract sees that answer and sends a second callback that applies the policy. Two cross-chain hops, both on-chain."
+**Voice:** "A price event on Ethereum Sepolia wakes a reactive contract on Lasna. It turns the last eight ticks into six features and asks for an assessment. The agent answers with a score. The reactive contract sees that answer and sends a second callback that applies the policy. Two callback hops, both on-chain."
 
 Show contract addresses in `deployments/latest.json` for five seconds.
 
@@ -106,7 +106,7 @@ forge test --match-test test_fallbackWhenAgentIsSilent -vv
 
 **On screen:** README top, repo URL, model metrics table.
 
-**Voice:** "Sentinel is open source, runs on Ethereum Sepolia and Reactive Lasna, and the full loop is covered by 19 tests including cross-language parity between Python and Solidity. Repo and transactions are in the submission. Thanks."
+**Voice:** "Sentinel is open source, runs on Ethereum Sepolia and Reactive Lasna, and the full loop is covered by 36 tests across both chain variants, including cross-language parity between Python and Solidity. Repo and transactions are in the submission. Thanks."
 
 ## Contingencies
 

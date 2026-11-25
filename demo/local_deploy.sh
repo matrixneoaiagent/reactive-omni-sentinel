@@ -63,9 +63,9 @@ VAULT=$(create src/SentinelVault.sol:SentinelVault \
 cast send --unlocked --from "$A" --rpc-url "$RPC" "$REACTIVE" "setVault(address)" "$VAULT" >/dev/null
 
 jq -n --arg feed "$FEED" --arg reactive "$REACTIVE" --arg vault "$VAULT" \
-  --arg rpc "$RPC" --arg chain "$ORIGIN_CHAIN" --argjson chain_id "$CHAIN_ID" \
+  --arg rpc "$RPC" --arg rpc_lasna "$RPC" --arg chain "$ORIGIN_CHAIN" --argjson chain_id "$CHAIN_ID" \
   --arg proxy "$PROXY" --arg explorer "$EXPLORER" \
-  '{feed:$feed,reactive:$reactive,vault:$vault,rpc:$rpc,origin_chain:$chain,
+  '{feed:$feed,reactive:$reactive,vault:$vault,rpc:$rpc,rpc_lasna:$rpc_lasna,origin_chain:$chain,
     chain_id:$chain_id,callback_proxy:$proxy,explorer:$explorer}' > "$OUT"
 echo "feed $FEED"
 echo "reactive $REACTIVE"

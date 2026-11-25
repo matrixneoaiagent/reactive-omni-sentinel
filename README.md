@@ -24,7 +24,7 @@ PriceTick ──▶ SentinelReactive ──▶ callback #1 ──▶ SentinelVau
 
 ## Why this needs Reactive Omni
 
-The loop has two callback hops, and the second one only exists because the first produced an event. A keeper bot could do this with a cron job, but then the policy is off-chain and the audit trail is a database. Here every hop is a reactive transaction and a callback: the origin event, the inference request, the score, and the policy change are all on-chain and independently verifiable. Omni's ~1 s blocks and instant finality keep the whole loop inside a single market tick; on the legacy ~7 s network the second hop would routinely miss the next tick.
+The loop has two callback hops, and the second one only exists because the first produced an event. A keeper bot could do this with a cron job, but then the policy is off-chain and the audit trail is a database. Here every hop is a reactive transaction and a callback: the origin event, the inference request, the score, and the policy change are all on-chain and independently verifiable. Omni's ~1 s blocks and instant finality keep the reactive half of the loop fast; the origin chain's block time still sets the floor (Ethereum Sepolia ~12 s, Base Sepolia 200 ms). The point is auditability and automatic execution, not HFT latency.
 
 ## What is in the box
 
@@ -170,10 +170,10 @@ cp deploy/config.env.example deploy/config.env
 ./deploy/deploy.sh
 
 # calm ticks, then the agent, then the crash
-./demo/publish.sh --calm --interval 6
+./demo/publish.sh --calm --interval 12
 .venv/bin/python agent/agent.py --env-file deploy/config.env
-./demo/publish.sh --crash --interval 5
-./demo/publish.sh --recover --interval 5
+./demo/publish.sh --crash --interval 12
+./demo/publish.sh --recover --interval 12
 ```
 
 ## Deployed addresses and transactions

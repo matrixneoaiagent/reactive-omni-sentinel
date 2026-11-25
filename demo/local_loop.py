@@ -72,15 +72,17 @@ def main() -> None:
     args = ap.parse_args()
 
     addrs = json.loads(Path(args.addresses).read_text())
-    rpc = args.rpc or addrs.get("rpc") or "http://127.0.0.1:8549"
+    rpc = args.rpc or addrs.get("rpc") or addrs.get("rpc_origin") or "http://127.0.0.1:8549"
+    rpc_lasna = addrs.get("rpc_lasna") or rpc
     chain_id = int(addrs.get("chain_id", 11155111))
     w3 = Web3(Web3.HTTPProvider(rpc, request_kwargs={"timeout": 30}))
+    w3l = Web3(Web3.HTTPProvider(rpc_lasna, request_kwargs={"timeout": 30}))
     sender = Web3.to_checksum_address(args.sender or w3.eth.accounts[0])
     feed = w3.eth.contract(address=Web3.to_checksum_address(addrs["feed"]), abi=ABI)
     reactive_addr = Web3.to_checksum_address(addrs["reactive"])
     vault_addr = Web3.to_checksum_address(addrs["vault"])
     vault = w3.eth.contract(address=vault_addr, abi=ABI)
-    system = w3.eth.contract(
+    system = w3l.eth.contract(
         address=Web3.to_checksum_address("0x8888888888888888888888888888888888888888"), abi=ABI
     )
 
@@ -115,7 +117,7 @@ def main() -> None:
             0,
         )
         tx2 = system.functions.trigger(reactive_addr, log).transact({"from": sender})
-        rc2 = w3.eth.wait_for_transaction_receipt(tx2)
+        rc2 = w3l.eth.wait_for_transaction_receipt(tx2)
         print(f"tick {tick_id} price {price} publish {tx.hex()} react {tx2.hex()} block {rc2.blockNumber}")
         return
 
@@ -141,7 +143,7 @@ def main() -> None:
             0,
         )
         tx = system.functions.trigger(reactive_addr, log).transact({"from": sender})
-        rc = w3.eth.wait_for_transaction_receipt(tx)
+        rc = w3l.eth.wait_for_transaction_receipt(tx)
         print(f"relayed score {a['scoreBps']} request {a['requestId']} tx {tx.hex()} block {rc.blockNumber}")
         return
 

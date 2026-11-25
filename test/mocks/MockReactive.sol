@@ -27,6 +27,7 @@ contract MockSystem {
     address public proxy;
     uint256 public subscribeCount;
     uint256 public unsubscribeCount;
+    mapping(address => uint256) internal _reserves;
 
     function setProxy(address proxy_) external {
         proxy = proxy_;
@@ -61,8 +62,12 @@ contract MockSystem {
         return 0;
     }
 
-    function reserves(address) external pure returns (uint256) {
-        return 0;
+    function depositTo(address contract_) external payable {
+        _reserves[contract_] += msg.value;
+    }
+
+    function reserves(address contract_) external view returns (uint256) {
+        return _reserves[contract_];
     }
 
     function requestCallbackV_1_0(Call memory call_) external {
@@ -102,6 +107,20 @@ contract MockSystem {
 ///         contract, exactly like the production proxy.
 contract MockProxy {
     error DeliveryFailed(bytes reason);
+
+    mapping(address => uint256) internal _reserves;
+
+    function depositTo(address contract_) external payable {
+        _reserves[contract_] += msg.value;
+    }
+
+    function debt(address) external pure returns (uint256) {
+        return 0;
+    }
+
+    function reserves(address contract_) external view returns (uint256) {
+        return _reserves[contract_];
+    }
 
     function deliver(address recipient, bytes calldata payload, address sender) external {
         bytes memory p = payload;

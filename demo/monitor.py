@@ -88,6 +88,12 @@ def main() -> None:
         or os.environ.get("RPC_URL")
         or "https://ethereum-sepolia-rpc.publicnode.com"
     )
+    deployment = Path("deployments/latest.json")
+    if deployment.exists():
+        dep = json.loads(deployment.read_text())
+        args.vault = args.vault or dep["contracts"]["vault"]
+        args.feed = args.feed or dep["contracts"]["price_feed"]
+        args.rpc = args.rpc or dep.get("rpc_origin")
     if not args.vault or not args.feed:
         raise SystemExit("--vault and --feed are required (or VAULT_ADDRESS / PRICE_FEED)")
 
