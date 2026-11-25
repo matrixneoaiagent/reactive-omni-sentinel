@@ -53,6 +53,7 @@ contract SentinelReactive is AbstractReactive {
     error ZeroAddress();
     error FeatureWindowTooShort();
     error BadDelay();
+    error NoPendingRequest();
 
     constructor(uint256 originChainId_, address priceFeed_, uint256 destChainId_, address owner_)
         payable {
@@ -97,6 +98,18 @@ contract SentinelReactive is AbstractReactive {
     function setFallbackDelay(uint256 seconds_) external onlyOwner {
         if (seconds_ < 30 || seconds_ > 3600) revert BadDelay();
         fallbackDelay = seconds_;
+    }
+
+    /// @notice Owner recovery for a missed score event: request the policy
+    ///         callback once the agent has scored the pending request on the
+    ///         vault. The vault still reads and applies its own stored score;
+    ///         this cannot force a policy for an unscored request.
+    function processScore(uint256 requestId, uint16 scoreBps) external onlyOwner {
+        if (!pending.active || pending.requestId != requestId) revert NoPendingRequest();
+        pending.active = false;
+        lastAppliedRequestId = requestId;
+        emit PolicyRequested(requestId, scoreBps);
+        _requestPolicy(requestId);
     }
 
     function coverDebt() external {

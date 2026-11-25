@@ -75,6 +75,33 @@ contract ReactiveTest is BaseTest {
         assertFalse(scored);
     }
 
+    function test_ownerCanProcessMissedScore() public {
+        for (uint256 i = 0; i < 6; i++) {
+            pushTick(2000e8 + i * 1e8);
+        }
+        (bool answered, uint16 score) = answerPending();
+        assertTrue(answered);
+        // The score is on the vault but the score event was not delivered.
+        (,,, bool scored, bool applied) = vault.getRequest(6);
+        assertTrue(scored);
+        assertFalse(applied);
+
+        vm.prank(address(0xBEEF));
+        vm.expectRevert(SentinelReactive.NotOwner.selector);
+        reactive.processScore(6, score);
+
+        reactive.processScore(6, score);
+        assertEq(sys.callCount(), 2);
+        MockSystem.Call memory c = sys.lastCall();
+        assertEq(bytes4(c.payload), POLICY_SELECTOR);
+        assertEq(c.recipient, address(vault));
+
+        (uint256 id,, bool active) = reactive.pending();
+        assertEq(id, 6);
+        assertFalse(active);
+        assertEq(reactive.lastAppliedRequestId(), 6);
+    }
+
     function test_scoreTriggersPolicyCallback() public {
         for (uint256 i = 0; i < 6; i++) {
             pushTick(2000e8 + i * 1e8);
