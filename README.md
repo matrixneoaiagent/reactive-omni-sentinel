@@ -122,6 +122,7 @@ docs/
   DEMO_SCRIPT.md             2:30 shot list
   SUBMISSION_CHECKLIST.md    form fields and evidence table
   DEPLOY_RUNBOOK.md          faucet → deploy → verify
+  SEPOLIA_VALIDATION.md      both-chain tests + local deploy rehearsal output
 ```
 
 ## Reproduce
@@ -160,7 +161,7 @@ Expected: score 0 while the window fills, 4768 at tick 6, `DEFENSIVE` at tick 8 
 
 ## Deploy and run
 
-Deployment is **testnet only** and costs $0 in real funds; it needs Sepolia ETH from a faucet, which is also the input to the official Reactive faucet (1 ETH → 100 lREACT; **0.01 SepETH → 1 lREACT** is enough, keep the rest for gas). The default is Ethereum Sepolia; `ORIGIN_CHAIN=base-sepolia` switches the whole path. See `docs/DEPLOY_RUNBOOK.md`.
+Deployment is **testnet only** and costs $0 in real funds; it needs Sepolia ETH from a faucet, which is also the input to the official Reactive faucet (1 ETH → 100 lREACT; **0.01 SepETH → 1 lREACT** is enough, keep the rest for gas). The default is Ethereum Sepolia; `ORIGIN_CHAIN=base-sepolia` switches the whole path. See `docs/DEPLOY_RUNBOOK.md` and the captured `docs/SEPOLIA_VALIDATION.md`.
 
 ```bash
 cp deploy/config.env.example deploy/config.env
