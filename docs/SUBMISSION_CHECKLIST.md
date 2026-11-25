@@ -22,17 +22,17 @@ Fill after `./deploy/deploy.sh` (default `ORIGIN_CHAIN=sepolia`) and the demo ru
 
 | # | Step | Chain | Tx hash | Explorer |
 |---|---|---|---|---|
-| 1 | Deploy feed | Ethereum Sepolia | `____` | `https://sepolia.etherscan.io/tx/____` |
-| 2 | Deploy reactive | Lasna | `____` | `https://lasna.reactscan.net/tx/____` |
-| 3 | Deploy vault | Ethereum Sepolia | `____` | `https://sepolia.etherscan.io/tx/____` |
-| 4 | `setVault` | Lasna | `____` | `https://lasna.reactscan.net/tx/____` |
-| 5 | Origin `PriceTick` (calm) | Ethereum Sepolia | `____` | `https://sepolia.etherscan.io/tx/____` |
-| 6 | Reactive tx → inference callback | Lasna | `____` | `https://lasna.reactscan.net/tx/____` |
-| 7 | `requestRiskAssessment` callback | Ethereum Sepolia | `____` | `https://sepolia.etherscan.io/tx/____` |
-| 8 | Agent `submitRiskScore` | Ethereum Sepolia | `____` | `https://sepolia.etherscan.io/tx/____` |
-| 9 | Reactive tx → policy callback | Lasna | `____` | `https://lasna.reactscan.net/tx/____` |
-| 10 | `applyPolicy` → DEFENSIVE | Ethereum Sepolia | `____` | `https://sepolia.etherscan.io/tx/____` |
-| 11 | Recovery → NORMAL | Ethereum Sepolia | `____` | `https://sepolia.etherscan.io/tx/____` |
+| 1 | Deploy feed | Ethereum Sepolia | `0xd434ac324f232d802e6a6a6397fb6f9a8daaa04d61e2cdb03cd46e08747e006a` | `https://sepolia.etherscan.io/tx/0xd434ac324f232d802e6a6a6397fb6f9a8daaa04d61e2cdb03cd46e08747e006a` |
+| 2 | Deploy reactive | Lasna | `0x2ea64a741859fc5b02c8261e74e7ba0250bf5ec630a0e4705004a5071deba515` | `https://lasna.reactscan.net/tx/0x2ea64a741859fc5b02c8261e74e7ba0250bf5ec630a0e4705004a5071deba515` |
+| 3 | Deploy vault | Ethereum Sepolia | `0x033b15ad21401497b0740f22117aef3bd967f5fd6cbaee3659bfd9c39cb7509e` | `https://sepolia.etherscan.io/tx/0x033b15ad21401497b0740f22117aef3bd967f5fd6cbaee3659bfd9c39cb7509e` |
+| 4 | `setVault` | Lasna | `0xf1b76728bc7ed68b1559a0ba24ca1b15d67698bde15e90860332014f6b09d58d` | `https://lasna.reactscan.net/tx/0xf1b76728bc7ed68b1559a0ba24ca1b15d67698bde15e90860332014f6b09d58d` |
+| 5 | Origin `PriceTick` (calm, #18) | Ethereum Sepolia | `0x2fd77f90cdbc34a4f33e5870174035c8f1e9bbc02baa9a8ad2a155b5b6cc09c2` | `https://sepolia.etherscan.io/tx/0x2fd77f90cdbc34a4f33e5870174035c8f1e9bbc02baa9a8ad2a155b5b6cc09c2` |
+| 6 | Reactive tx → inference callback | Lasna | `0xe624133209086b347597744f4d2801ab2050df3895200aa7965fb6c5168f6db4` | `https://lasna.reactscan.net/tx/0xe624133209086b347597744f4d2801ab2050df3895200aa7965fb6c5168f6db4` |
+| 7 | `requestRiskAssessment` callback | Ethereum Sepolia | `0x49354ae47f4438e67ddfeab7dfa62eeb949dd1383b1f7d68f52e953ab1fe64de` | `https://sepolia.etherscan.io/tx/0x49354ae47f4438e67ddfeab7dfa62eeb949dd1383b1f7d68f52e953ab1fe64de` |
+| 8 | Agent `submitRiskScore` (4768) | Ethereum Sepolia | `0x9d5bf2ce295fa66e99a9941a60e231ec8f7456daefe60c39ae63c562c36ca9f7` | `https://sepolia.etherscan.io/tx/0x9d5bf2ce295fa66e99a9941a60e231ec8f7456daefe60c39ae63c562c36ca9f7` |
+| 9 | Reactive tx → policy callback | Lasna | `0xcf59d8c8bc5f0d81014faf0c1ba3773c7bc03ccfabf120af6105a76ac40618a4` | `https://lasna.reactscan.net/tx/0xcf59d8c8bc5f0d81014faf0c1ba3773c7bc03ccfabf120af6105a76ac40618a4` |
+| 10 | `applyPolicy` → NORMAL (4768) | Ethereum Sepolia | `0xf1c343118e25bfb9eec10c81258dfdad5e996204e25dac1c7a2c1062a01d0b9f` | `https://sepolia.etherscan.io/tx/0xf1c343118e25bfb9eec10c81258dfdad5e996204e25dac1c7a2c1062a01d0b9f` |
+| 11 | Recovery → NORMAL | — | n/a live (calm loop already NORMAL) | covered by `test/E2E.t.sol` + local Sepolia rehearsal |
 
 The minimum the form asks for is "a few transaction hashes showing the full loop, from origin event to callback". Rows **5–10** are the irreducible set; rows 1–4 prove deployment.
 

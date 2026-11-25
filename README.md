@@ -179,22 +179,22 @@ cp deploy/config.env.example deploy/config.env
 
 ## Deployed addresses and transactions
 
-> **Status: pending testnet deployment.** The repository is complete and the full loop is proven in Foundry. The public addresses and transaction hashes are filled here and in `deployments/latest.json` after the deployer runs `deploy/deploy.sh`. No mainnet deployment and no purchase are required.
+> **Status: live on Ethereum Sepolia + Reactive Lasna (2026-11-25).** The calm loop is applied (`mode 0`, `NORMAL`). The crash → `DEFENSIVE` and recovery → `NORMAL` path is exercised by the Foundry E2E test and the local Sepolia rehearsal (see `docs/SEPOLIA_VALIDATION.md`); the live second request (19) also applied `NORMAL`. No mainnet deployment and no purchase are required.
 
 | Item | Value |
 |---|---|
-| PriceFeedOrigin (11155111) | _pending_ |
-| SentinelReactive (5318007) | _pending_ |
-| SentinelVault (11155111) | _pending_ |
-| Origin tick tx | _pending_ |
-| Reactive inference tx | _pending_ |
-| Inference request callback tx | _pending_ |
-| Agent score tx | _pending_ |
-| Reactive policy tx | _pending_ |
-| Policy callback tx (mode change) | _pending_ |
+| PriceFeedOrigin (11155111) | `0x6F6f31D95c791aA3f7e61277E7e46Ff2BA3891D1` |
+| SentinelReactive (5318007) | `0x790e35eF3F2aCA3Bec0418fBe14973CDC80F89D9` |
+| SentinelVault (11155111) | `0xe006b89478eeAd20B34B8B7e8a2ef980Dd4760e6` |
+| Origin tick tx (seed 18) | `0x2fd77f90cdbc34a4f33e5870174035c8f1e9bbc02baa9a8ad2a155b5b6cc09c2` |
+| Reactive inference tx | `0xe624133209086b347597744f4d2801ab2050df3895200aa7965fb6c5168f6db4` |
+| Inference request callback tx | `0x49354ae47f4438e67ddfeab7dfa62eeb949dd1383b1f7d68f52e953ab1fe64de` |
+| Agent score tx | `0x9d5bf2ce295fa66e99a9941a60e231ec8f7456daefe60c39ae63c562c36ca9f7` |
+| Reactive policy tx | `0xcf59d8c8bc5f0d81014faf0c1ba3773c7bc03ccfabf120af6105a76ac40618a4` |
+| Policy callback tx (NORMAL) | `0xf1c343118e25bfb9eec10c81258dfdad5e996204e25dac1c7a2c1062a01d0b9f` |
 | Model hash | `0x671b59e6a51dddd6ef2900c996807258f1a783a58ceff12ed5fe538af3d403e9` |
 
-The exact evidence table and Etherscan/Reactscan link format are in `docs/SUBMISSION_CHECKLIST.md`.
+The exact evidence table and Etherscan/Reactscan link format are in `docs/SUBMISSION_CHECKLIST.md`. The live loop applied `NORMAL`; the `DEFENSIVE`/recovery variant is covered by `test/E2E.t.sol` and the local Sepolia rehearsal.
 
 ## Limitations and production path
 
