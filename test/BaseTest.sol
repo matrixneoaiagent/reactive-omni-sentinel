@@ -11,26 +11,41 @@ import { SentinelVault } from "../src/SentinelVault.sol";
 import { SentinelModel } from "../src/lib/SentinelModel.sol";
 import { MockSystem, MockProxy } from "./mocks/MockReactive.sol";
 
+/// @notice Shared fixture.  The origin/destination chain is a virtual so the
+///         same suite can run against Base Sepolia and Ethereum Sepolia.
 abstract contract BaseTest is Test {
     address internal constant SYSTEM_ADDR = 0x8888888888888888888888888888888888888888;
-    address internal constant PROXY_ADDR = 0x476F44b11F5C942c58f4c8E3d0300E5710743585;
-    uint256 internal constant BASE_SEPOLIA = 84532;
-    uint256 internal constant LASNA = 5318007;
 
     MockSystem internal sys;
     PriceFeedOrigin internal feed;
     SentinelReactive internal reactive;
     SentinelVault internal vault;
 
+    address internal proxy;
+    uint256 internal originChain;
+
+    /// @notice Chain where the feed and vault live, and where callbacks land.
+    function originChainId() internal pure virtual returns (uint256) {
+        return 84532; // Base Sepolia
+    }
+
+    /// @notice Reactive callback proxy on the origin/destination chain.
+    function callbackProxy() internal pure virtual returns (address) {
+        return 0x476F44b11F5C942c58f4c8E3d0300E5710743585; // Base Sepolia
+    }
+
     function setUp() public virtual {
+        originChain = originChainId();
+        proxy = callbackProxy();
+
         vm.etch(SYSTEM_ADDR, address(new MockSystem()).code);
-        vm.etch(PROXY_ADDR, address(new MockProxy()).code);
+        vm.etch(proxy, address(new MockProxy()).code);
         sys = MockSystem(SYSTEM_ADDR);
-        sys.setProxy(PROXY_ADDR);
+        sys.setProxy(proxy);
 
         feed = new PriceFeedOrigin(address(this));
-        reactive = new SentinelReactive(BASE_SEPOLIA, address(feed), BASE_SEPOLIA, address(this));
-        vault = new SentinelVault(IPayable(payable(PROXY_ADDR)), address(reactive));
+        reactive = new SentinelReactive(originChain, address(feed), originChain, address(this));
+        vault = new SentinelVault(IPayable(payable(proxy)), address(reactive));
         reactive.setVault(address(vault));
     }
 
@@ -39,7 +54,7 @@ abstract contract BaseTest is Test {
     function pushTick(uint256 price) internal returns (uint256 id) {
         id = feed.publish(price);
         IReactive.LogRecord memory log_ = IReactive.LogRecord({
-            chainId: BASE_SEPOLIA,
+            chainId: originChain,
             contractAddress: address(feed),
             topic0: reactive.PRICE_TICK_TOPIC0(),
             topic1: id,
@@ -72,7 +87,7 @@ abstract contract BaseTest is Test {
         uint16 score = vault.riskScoreBps();
         address agent = vault.lastAgent();
         IReactive.LogRecord memory log_ = IReactive.LogRecord({
-            chainId: BASE_SEPOLIA,
+            chainId: originChain,
             contractAddress: address(vault),
             topic0: reactive.RISK_SCORE_TOPIC0(),
             topic1: requestId,

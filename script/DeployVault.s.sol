@@ -5,7 +5,7 @@ import { Script, console2 } from "forge-std/Script.sol";
 import { IPayable } from "reactive-lib/interfaces/IPayable.sol";
 import { SentinelVault } from "../src/SentinelVault.sol";
 
-/// @notice Step 3, Base Sepolia: the vault, bound to the reactive contract.
+/// @notice Step 3, origin chain: the vault, bound to the reactive contract.
 /// forge script script/DeployVault.s.sol --rpc-url $RPC_BASE --broadcast
 contract DeployVault is Script {
     function run() external returns (address vault) {

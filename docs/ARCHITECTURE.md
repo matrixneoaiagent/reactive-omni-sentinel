@@ -6,9 +6,9 @@
 sequenceDiagram
     autonumber
     participant U as User / publisher
-    participant F as PriceFeedOrigin<br/>(Base Sepolia)
+    participant F as PriceFeedOrigin<br/>(Ethereum Sepolia)
     participant R as SentinelReactive<br/>(Lasna)
-    participant V as SentinelVault<br/>(Base Sepolia)
+    participant V as SentinelVault<br/>(Ethereum Sepolia)
     participant A as AI agent<br/>(off-chain)
 
     U->>F: publish(price)
@@ -27,9 +27,20 @@ sequenceDiagram
 
 The **first callback** exists so the AI request is itself an on-chain event on the destination chain, where the agent can watch it with ordinary `eth_getLogs`. The **second callback** exists so the policy transition is executed by the reactive contract, not by the agent's transaction. The agent never has authority to change the mode; it only supplies a score that the vault can verify.
 
+## Chain selection
+
+The origin and destination are the same EVM testnet; the reactive contract lives on Lasna. `ORIGIN_CHAIN` selects the pair:
+
+| `ORIGIN_CHAIN` | Chain ID | Callback proxy | Reactive faucet |
+|---|---|---|---|
+| `sepolia` (default) | 11155111 | `0xAa14d9Cd0f788Ca23d11805986C1d8bd035D23b4` | `0x9b9BB25f1A81078C544C829c5EB7822d747Cf434` |
+| `base-sepolia` | 84532 | `0x476F44b11F5C942c58f4c8E3d0300E5710743585` | `0x2afaFD298b23b62760711756088F75B7409f5967` |
+
+The contract source is chain-agnostic; the chain ID is passed to the constructor and stored in `ORIGIN_CHAIN_ID`, and `PRICE_FEED` / `vault` are bound at deployment. `SentinelVault` stores the selected callback proxy as its immutable `_SERVICE_PROVIDER`. `test/SepoliaPath.t.sol` re-runs the reactive, vault and E2E suites with the Sepolia values so the two paths cannot silently diverge.
+
 ## Contracts
 
-### PriceFeedOrigin (Base Sepolia, 84532)
+### PriceFeedOrigin (Ethereum Sepolia, 11155111)
 
 ```solidity
 event PriceTick(uint256 indexed tickId, uint256 price, uint256 timestamp);
@@ -52,8 +63,8 @@ State:
 
 Subscriptions:
 
-1. `(84532, feed, PriceTick topic0, *, *, *)`
-2. `(84532, vault, RiskScoreSubmitted topic0, *, *, *)` — added by `setVault`, because the vault address is not known at construction.
+1. `(ORIGIN_CHAIN_ID, feed, PriceTick topic0, *, *, *)`
+2. `(ORIGIN_CHAIN_ID, vault, RiskScoreSubmitted topic0, *, *, *)` — added by `setVault`, because the vault address is not known at construction.
 
 `react()` routes on `(chainId, contractAddress, topic0)`, checks `lastPriceTickId`, decodes the log, pushes the price, and:
 
@@ -64,11 +75,11 @@ Keeping one request in flight is deliberate: a five-tick crash should not produc
 
 The reactive contract never trusts the score event's contents beyond the `requestId`; the vault already verified the score before emitting.
 
-### SentinelVault (Base Sepolia, 84532)
+### SentinelVault (Ethereum Sepolia, 11155111)
 
 Inherits `AbstractCallback`, so:
 
-- `onlyServiceProvider` ensures the caller is the Base Sepolia callback proxy;
+- `onlyServiceProvider` ensures the caller is the configured callback proxy;
 - `onlyCallbackSender(reactive_)` ensures the first payload argument (injected by the network) is the authorised reactive contract.
 
 The first argument of every callback signature is an `address` placeholder. The network writes the reactive sender there; the contract passes it to the modifier.
@@ -149,18 +160,18 @@ This is exactly what `test/mocks/MockReactive.sol::MockProxy` does, which is why
 ## Gas and funding
 
 - **Reactive side:** `react()` writes a few storage slots and computes 6 features plus ~56 multiplications. A 900k gas cap is comfortable. The contract pays in lREACT from reserves; fund with `SYSTEM.depositTo(reactive)`.
-- **Destination side:** each callback is charged to the vault in Base Sepolia ETH. `depositTo(vault)` on the callback proxy creates reserves. 0.005 ETH is enough for hundreds of callbacks at testnet gas prices.
+- **Destination side:** each callback is charged to the vault in origin-chain ETH. `depositTo(vault)` on the callback proxy creates reserves. 0.005 ETH is enough for hundreds of callbacks at testnet gas prices.
 - **Callback gas limits:** 500k for `requestRiskAssessment`, 300k for `applyPolicy`/`applyFallback`. The proxy withholds overhead, so the effective limit is lower; both functions are well under 200k in tests.
-- **Agent:** pays ordinary Base Sepolia gas for one `submitRiskScore` per request (~120k gas).
+- **Agent:** pays ordinary origin-chain gas for one `submitRiskScore` per request (~62–120k gas).
 
 ## Deployment order (circular dependency)
 
 The vault needs the reactive address; the reactive contract needs the vault address to subscribe to score events. The cycle is broken on the reactive side:
 
-1. deploy `PriceFeedOrigin` on Base Sepolia;
+1. deploy `PriceFeedOrigin` on the origin chain;
 2. deploy `SentinelReactive` on Lasna with the feed address;
-3. deploy `SentinelVault` on Base Sepolia with the reactive address;
+3. deploy `SentinelVault` on the origin chain with the reactive address;
 4. call `reactive.setVault(vault)` on Lasna (subscribes to score events);
-5. fund the reactive contract (lREACT) and the vault (Base Sepolia ETH).
+5. fund the reactive contract (lREACT) and the vault (origin-chain ETH).
 
 `setVault` is one-shot and owner-only. `_CALLBACK_SENDER` in the vault is immutable, so a wrong reactive address requires redeploying the vault.

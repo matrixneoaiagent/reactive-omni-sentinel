@@ -14,7 +14,7 @@ from eth_abi import decode
 from eth_utils import keccak
 from web3 import Web3
 
-BASE_EXPLORER = "https://sepolia.basescan.org/tx/"
+DEFAULT_ORIGIN_EXPLORER = "https://sepolia.etherscan.io"
 LASNA_EXPLORER = "https://lasna.reactscan.net/tx/"
 
 ABI = [
@@ -57,16 +57,22 @@ def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--deployments", default="deployments/latest.json")
     ap.add_argument("--blocks", type=int, default=20000)
-    ap.add_argument("--rpc-base", default="https://sepolia.base.org")
+    ap.add_argument("--rpc-origin", default=None)
     ap.add_argument("--rpc-lasna", default="https://lasna-rpc.rnk.dev/")
     args = ap.parse_args()
 
     dep = json.loads(Path(args.deployments).read_text())
+    origin_explorer = (dep.get("explorer") or DEFAULT_ORIGIN_EXPLORER) + "/tx/"
+    rpc_origin = (
+        args.rpc_origin
+        or dep.get("rpc")
+        or "https://ethereum-sepolia-rpc.publicnode.com"
+    )
     feed = Web3.to_checksum_address(dep["contracts"]["price_feed"])
     vault = Web3.to_checksum_address(dep["contracts"]["vault"])
     reactive = Web3.to_checksum_address(dep["contracts"]["reactive"])
 
-    base = Web3(Web3.HTTPProvider(args.rpc_base, request_kwargs={"timeout": 30}))
+    base = Web3(Web3.HTTPProvider(rpc_origin, request_kwargs={"timeout": 30}))
     lasna = Web3(Web3.HTTPProvider(args.rpc_lasna, request_kwargs={"timeout": 30}))
 
     earliest = int(dep.get("block", 0))
@@ -94,13 +100,13 @@ def main() -> None:
 
     rows = []
     for e in ticks:
-        rows.append((e["blockNumber"], "origin", f"PriceTick #{e['args']['tickId']} price {e['args']['price']/1e8:.2f}", BASE_EXPLORER + e["transactionHash"].hex()))
+        rows.append((e["blockNumber"], "origin", f"PriceTick #{e['args']['tickId']} price {e['args']['price']/1e8:.2f}", origin_explorer + e["transactionHash"].hex()))
     for e in scores:
-        rows.append((e["blockNumber"], "base", f"score {e['args']['scoreBps']} for request {e['args']['requestId']}", BASE_EXPLORER + e["transactionHash"].hex()))
+        rows.append((e["blockNumber"], "origin", f"score {e['args']['scoreBps']} for request {e['args']['requestId']}", origin_explorer + e["transactionHash"].hex()))
     for e in policies:
-        rows.append((e["blockNumber"], "base", f"policy mode {e['args']['mode']} score {e['args']['scoreBps']}", BASE_EXPLORER + e["transactionHash"].hex()))
+        rows.append((e["blockNumber"], "origin", f"policy mode {e['args']['mode']} score {e['args']['scoreBps']}", origin_explorer + e["transactionHash"].hex()))
     for e in modes:
-        rows.append((e["blockNumber"], "base", f"ModeChanged {e['args']['from']} -> {e['args']['to']}", BASE_EXPLORER + e["transactionHash"].hex()))
+        rows.append((e["blockNumber"], "origin", f"ModeChanged {e['args']['from']} -> {e['args']['to']}", origin_explorer + e["transactionHash"].hex()))
 
     for log in requests:
         if int(log["topics"][2], 16) != int(reactive, 16):
@@ -121,7 +127,7 @@ def main() -> None:
             dest = "0x" + int(rec[4]).to_bytes(32, "big").hex()
             err = rec[5]
             label = "callback ok" if not err else f"callback error {err.hex()[:20]}"
-            rows.append((log["blockNumber"], "dest", f"{label} chain {rec[3]}", BASE_EXPLORER + dest))
+            rows.append((log["blockNumber"], "dest", f"{label} chain {rec[3]}", origin_explorer + dest))
 
     rows.sort(key=lambda r: r[0])
     for block, where, what, link in rows:

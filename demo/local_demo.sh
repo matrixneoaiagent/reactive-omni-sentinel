@@ -7,8 +7,11 @@ set -euo pipefail
 cd "$(dirname "$0")/.."
 export PATH="${FOUNDRY_BIN:-$HOME/.foundry/bin}:$PATH"
 
+ORIGIN_CHAIN=${ORIGIN_CHAIN:-sepolia}
 PORT=${PORT:-8549}
 RPC=http://127.0.0.1:$PORT
+echo "local rehearsal on $ORIGIN_CHAIN"
+export ORIGIN_CHAIN
 export PORT
 ./demo/local_deploy.sh
 ADDRS=${OUT:-/tmp/opencode/reactive-local.json}

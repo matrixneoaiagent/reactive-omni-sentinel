@@ -73,7 +73,7 @@ def load_env(path: str | None) -> None:
 
 def main() -> None:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--rpc", default=os.environ.get("RPC_URL", "https://sepolia.base.org"))
+    ap.add_argument("--rpc", default=None)
     ap.add_argument("--vault", default=os.environ.get("VAULT_ADDRESS"))
     ap.add_argument("--feed", default=os.environ.get("PRICE_FEED"))
     ap.add_argument("--lookback", type=int, default=9000)
@@ -82,6 +82,12 @@ def main() -> None:
     args = ap.parse_args()
 
     load_env(args.env_file if Path(args.env_file).exists() else None)
+    args.rpc = (
+        args.rpc
+        or os.environ.get("RPC_ORIGIN")
+        or os.environ.get("RPC_URL")
+        or "https://ethereum-sepolia-rpc.publicnode.com"
+    )
     if not args.vault or not args.feed:
         raise SystemExit("--vault and --feed are required (or VAULT_ADDRESS / PRICE_FEED)")
 
@@ -99,7 +105,7 @@ def main() -> None:
         deposits = vault.functions.totalDeposits().call() / 1e18
 
         print("\033[2J\033[H", end="")
-        print(f"{BOLD}Sentinel{RESET}  Base Sepolia block {latest}  feed tick {feed_tick}")
+        print(f"{BOLD}Sentinel{RESET}  chain {w3.eth.chain_id} block {latest}  feed tick {feed_tick}")
         badge = f"{GREEN}NORMAL{RESET}" if mode == 0 else f"{RED}DEFENSIVE{RESET}"
         print(f"mode {badge}   AI risk score {score}/10000   last request {tick}   deposits {deposits:.4f} ETH")
         print(f"{DIM}{args.vault}{RESET}")

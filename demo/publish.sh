@@ -16,7 +16,8 @@ if [[ -f "$CONFIG" ]]; then
   set -a; source "$CONFIG"; set +a
 fi
 
-: "${RPC_BASE:?RPC_BASE missing}"
+: "${RPC_ORIGIN:=${RPC_BASE:-}}"
+: "${RPC_ORIGIN:?RPC_ORIGIN (or legacy RPC_BASE) missing}"
 : "${CALLBACK_PROXY:=0x476F44b11F5C942c58f4c8E3d0300E5710743585}"
 
 AUTH=()
@@ -50,7 +51,7 @@ if [[ "${2:-}" == "--interval" ]]; then INTERVAL=${3:?}; fi
 echo "feed $FEED  mode $MODE  interval ${INTERVAL}s"
 for ((i=${RANGE[0]}; i<${RANGE[1]}; i++)); do
   price=${PRICES[$i]}
-  tx=$(cast send --json --rpc-url "$RPC_BASE" "${AUTH[@]}" "$FEED" "publish(uint256)" "$price" | jq -r .transactionHash)
+  tx=$(cast send --json --rpc-url "$RPC_ORIGIN" "${AUTH[@]}" "$FEED" "publish(uint256)" "$price" | jq -r .transactionHash)
   printf 'tick %2d  price %s  tx %s\n' "$((i+1))" "$price" "$tx"
   if (( i + 1 < RANGE[1] )); then sleep "$INTERVAL"; fi
 done

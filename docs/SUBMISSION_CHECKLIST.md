@@ -18,21 +18,21 @@ Deadline: **2026-12-05 20:00 UTC**. Submit at <https://dorahacks.io/hackathon/re
 
 ## 2. Evidence table
 
-Fill after `deploy/deploy.sh` and the demo run. All links are public.
+Fill after `./deploy/deploy.sh` (default `ORIGIN_CHAIN=sepolia`) and the demo run. All links are public. Base Sepolia is supported by `ORIGIN_CHAIN=base-sepolia`; the explorer column then becomes `sepolia.basescan.org`.
 
 | # | Step | Chain | Tx hash | Explorer |
 |---|---|---|---|---|
-| 1 | Deploy feed | Base Sepolia | `____` | `https://sepolia.basescan.org/tx/____` |
+| 1 | Deploy feed | Ethereum Sepolia | `____` | `https://sepolia.etherscan.io/tx/____` |
 | 2 | Deploy reactive | Lasna | `____` | `https://lasna.reactscan.net/tx/____` |
-| 3 | Deploy vault | Base Sepolia | `____` | `https://sepolia.basescan.org/tx/____` |
+| 3 | Deploy vault | Ethereum Sepolia | `____` | `https://sepolia.etherscan.io/tx/____` |
 | 4 | `setVault` | Lasna | `____` | `https://lasna.reactscan.net/tx/____` |
-| 5 | Origin `PriceTick` (calm) | Base Sepolia | `____` | `https://sepolia.basescan.org/tx/____` |
+| 5 | Origin `PriceTick` (calm) | Ethereum Sepolia | `____` | `https://sepolia.etherscan.io/tx/____` |
 | 6 | Reactive tx → inference callback | Lasna | `____` | `https://lasna.reactscan.net/tx/____` |
-| 7 | `requestRiskAssessment` callback | Base Sepolia | `____` | `https://sepolia.basescan.org/tx/____` |
-| 8 | Agent `submitRiskScore` | Base Sepolia | `____` | `https://sepolia.basescan.org/tx/____` |
+| 7 | `requestRiskAssessment` callback | Ethereum Sepolia | `____` | `https://sepolia.etherscan.io/tx/____` |
+| 8 | Agent `submitRiskScore` | Ethereum Sepolia | `____` | `https://sepolia.etherscan.io/tx/____` |
 | 9 | Reactive tx → policy callback | Lasna | `____` | `https://lasna.reactscan.net/tx/____` |
-| 10 | `applyPolicy` → DEFENSIVE | Base Sepolia | `____` | `https://sepolia.basescan.org/tx/____` |
-| 11 | Recovery → NORMAL | Base Sepolia | `____` | `https://sepolia.basescan.org/tx/____` |
+| 10 | `applyPolicy` → DEFENSIVE | Ethereum Sepolia | `____` | `https://sepolia.etherscan.io/tx/____` |
+| 11 | Recovery → NORMAL | Ethereum Sepolia | `____` | `https://sepolia.etherscan.io/tx/____` |
 
 The minimum the form asks for is "a few transaction hashes showing the full loop, from origin event to callback". Rows **5–10** are the irreducible set; rows 1–4 prove deployment.
 
@@ -57,7 +57,7 @@ The minimum the form asks for is "a few transaction hashes showing the full loop
 | **Execution** | Rows 5–10 show the origin event, the reactive tx, the first callback, the agent tx, the second reactive tx, and the policy callback. `forge test` shows the same loop deterministically. |
 | **Integration** | The reactive contract computes the features, decides when to ask for inference, routes the score, and owns the policy callback. The AI is not a bolt-on: `SentinelModel` is part of the vault's verification path. |
 | **Usefulness** | A vault guard that distinguishes a noisy dip from a regime change; deposits are blocked only while the model sees stress, and withdrawals always work. Fallback covers agent downtime. |
-| **Craft** | 19 tests, cross-language parity vectors, generated weights with a committed hash, a deploy script with preflight and verification, a runbook, a model card with honest metrics, and a reproducible demo. |
+| **Craft** | 36 tests (both chains), cross-language parity vectors, generated weights with a committed hash, a deploy script with preflight and verification, a runbook, a model card with honest metrics, and a reproducible demo. |
 
 ## 5. Video checklist
 
@@ -84,6 +84,6 @@ The minimum the form asks for is "a few transaction hashes showing the full loop
 
 The entry fails the Execution gate without on-chain evidence. Do not submit a repo-only build as a Reactive Meets AI entry. Options, in order:
 
-1. Claim Base Sepolia ETH from a free faucet and deploy (preferred; $0).
+1. Claim Ethereum Sepolia ETH from the free PoW faucet (<https://sepolia-faucet.pk910.de/>) and deploy with `ORIGIN_CHAIN=sepolia` (preferred; $0).
 2. Ask the organizer in the DoraHacks Q&A whether a Lasna-only or local trace is acceptable (unlikely; the page requires deployed addresses and tx hashes).
 3. Withdraw rather than submit an entry that cannot be scored.

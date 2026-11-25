@@ -13,7 +13,8 @@ if [[ -f "$CONFIG" ]]; then
   set -a; source "$CONFIG"; set +a
 fi
 
-: "${RPC_BASE:?RPC_BASE missing}"
+: "${RPC_ORIGIN:=${RPC_BASE:-}}"
+: "${RPC_ORIGIN:?RPC_ORIGIN (or legacy RPC_BASE) missing}"
 VAULT=${VAULT_ADDRESS:-$(jq -r .contracts.vault deployments/latest.json)}
 USER_ADDR=${USER_ADDR:-${OWNER:?set USER_ADDR or OWNER}}
 VALUE=${VALUE:-0.001ether}
@@ -23,7 +24,7 @@ if [[ -n "${ACCOUNT:-}" ]]; then AUTH=(--account "$ACCOUNT"); else AUTH=(--priva
 
 case "${1:---check}" in
   --check)
-    if out=$(cast call "$VAULT" "deposit()" --value "$VALUE" --from "$USER_ADDR" --rpc-url "$RPC_BASE" 2>&1); then
+    if out=$(cast call "$VAULT" "deposit()" --value "$VALUE" --from "$USER_ADDR" --rpc-url "$RPC_ORIGIN" 2>&1); then
       echo "deposit allowed (vault is NORMAL)"
     else
       echo "deposit blocked:"
@@ -32,7 +33,7 @@ case "${1:---check}" in
     fi
     ;;
   --send)
-    cast send --json --rpc-url "$RPC_BASE" "${AUTH[@]}" "$VAULT" "deposit()" --value "$VALUE" \
+    cast send --json --rpc-url "$RPC_ORIGIN" "${AUTH[@]}" "$VAULT" "deposit()" --value "$VALUE" \
       | jq -r '"deposit tx " + .transactionHash'
     ;;
   *)

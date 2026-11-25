@@ -114,6 +114,11 @@ class Agent:
         self.w3 = Web3(Web3.HTTPProvider(args.rpc_url, request_kwargs={"timeout": 30}))
         if not self.w3.is_connected():
             raise SystemExit(f"cannot reach RPC {args.rpc_url}")
+        if args.expected_chain_id and self.w3.eth.chain_id != int(args.expected_chain_id):
+            raise SystemExit(
+                f"RPC chain {self.w3.eth.chain_id} != expected {args.expected_chain_id}; "
+                "check RPC_ORIGIN and ORIGIN_CHAIN_ID"
+            )
         self.vault = self.w3.eth.contract(address=Web3.to_checksum_address(args.vault), abi=ABI)
         self.state = State.load(Path(args.state), args.start_block)
         if args.start_block == 0 and not Path(args.state).exists():
@@ -243,6 +248,7 @@ class Agent:
         signal.signal(signal.SIGTERM, self.stop)
         self.log(
             event="start",
+            chain_id=self.w3.eth.chain_id,
             vault=self.vault.address,
             agent=self.account.address if self.account else None,
             model_hash=self.model.model_hash,
@@ -272,7 +278,8 @@ class Agent:
 
 def main() -> None:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--rpc-url", default=os.environ.get("RPC_URL", "https://sepolia.base.org"))
+    ap.add_argument("--rpc-url", default=None)
+    ap.add_argument("--expected-chain-id", default=None)
     ap.add_argument("--vault", default=os.environ.get("VAULT_ADDRESS"))
     ap.add_argument("--model", default=str(DEFAULT_MODEL))
     ap.add_argument("--state", default=str(ROOT / "agent/state.json"))
@@ -289,6 +296,20 @@ def main() -> None:
     args = ap.parse_args()
 
     load_env_file(args.env_file)
+    args.rpc_url = (
+        args.rpc_url
+        or os.environ.get("RPC_ORIGIN")
+        or os.environ.get("RPC_URL")
+        or "https://ethereum-sepolia-rpc.publicnode.com"
+    )
+    args.expected_chain_id = args.expected_chain_id or os.environ.get("ORIGIN_CHAIN_ID") or None
+    if not args.expected_chain_id:
+        args.expected_chain_id = {
+            "sepolia": 11155111,
+            "base-sepolia": 84532,
+        }.get(os.environ.get("ORIGIN_CHAIN", ""), None)
+    if args.expected_chain_id:
+        args.expected_chain_id = int(args.expected_chain_id)
     model = SentinelModel.load(args.model)
 
     if args.score:

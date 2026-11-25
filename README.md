@@ -2,13 +2,13 @@
 
 **Reactive Omni Buildathon · Reactive Meets AI track**
 
-Sentinel puts a small neural network inside a Reactive Network automation loop. Price events on Base Sepolia become features on Reactive Lasna; the network asks an off-chain agent for an assessment; the agent's score is **recomputed and verified on-chain** before the vault changes its risk posture. If the agent is late, the reactive contract applies a conservative fallback instead of waiting forever.
+Sentinel puts a small neural network inside a Reactive Network automation loop. Price events on Ethereum Sepolia become features on Reactive Lasna; the network asks an off-chain agent for an assessment; the agent's score is **recomputed and verified on-chain** before the vault changes its risk posture. If the agent is late, the reactive contract applies a conservative fallback instead of waiting forever.
 
 > Thresholds cannot tell noise from a regime change. Sentinel scores the regime, and the contract — not the agent — decides what to do about it.
 
 ```
-Base Sepolia                    Reactive Lasna                 Base Sepolia
-─────────────                   ──────────────                 ─────────────
+Ethereum Sepolia                Reactive Lasna                 Ethereum Sepolia
+────────────────                ──────────────                 ────────────────
 PriceTick ──▶ SentinelReactive ──▶ callback #1 ──▶ SentinelVault
 (origin)        features              request          emits RiskAssessmentRequested
                                         │
@@ -24,17 +24,26 @@ PriceTick ──▶ SentinelReactive ──▶ callback #1 ──▶ SentinelVau
 
 ## Why this needs Reactive Omni
 
-The loop has two cross-chain hops, and the second one only exists because the first produced an event. A keeper bot could do this with a cron job, but then the policy is off-chain and the audit trail is a database. Here every hop is a reactive transaction and a callback: the origin event, the inference request, the score, and the policy change are all on-chain and independently verifiable. Omni's ~1 s blocks and instant finality keep the whole loop inside a single market tick; on the legacy ~7 s network the second hop would routinely miss the next tick.
+The loop has two callback hops, and the second one only exists because the first produced an event. A keeper bot could do this with a cron job, but then the policy is off-chain and the audit trail is a database. Here every hop is a reactive transaction and a callback: the origin event, the inference request, the score, and the policy change are all on-chain and independently verifiable. Omni's ~1 s blocks and instant finality keep the whole loop inside a single market tick; on the legacy ~7 s network the second hop would routinely miss the next tick.
 
 ## What is in the box
 
 | Contract | Chain | Job |
 |---|---|---|
-| `PriceFeedOrigin` | Base Sepolia (84532) | Publishes `PriceTick(tickId, price, timestamp)`. A stand-in for a Chainlink adapter or DEX `Sync` subscription. |
+| `PriceFeedOrigin` | Ethereum Sepolia (11155111) | Publishes `PriceTick(tickId, price, timestamp)`. A stand-in for a Chainlink adapter or DEX `Sync` subscription. |
 | `SentinelReactive` | Reactive Lasna (5318007) | Subscribes to ticks and score events, keeps an 8-tick ring buffer, computes six integer features, requests inference, then requests the policy callback. Applies a timeout fallback. |
-| `SentinelVault` | Base Sepolia (84532) | Holds user deposits. Accepts new deposits only in `NORMAL` mode. Verifies the agent's score against the committed model, applies hysteresis, and exposes the full request history. |
+| `SentinelVault` | Ethereum Sepolia (11155111) | Holds user deposits. Accepts new deposits only in `NORMAL` mode. Verifies the agent's score against the committed model, applies hysteresis, and exposes the full request history. |
 | `SentinelFeatures` | library | Deterministic integer feature extraction, mirrored in `training/features.py`. |
 | `SentinelModel` | library | Integer-only 6-8-1 MLP inference, generated from `training/weights.json`. |
+
+The origin/destination chain is switchable with `ORIGIN_CHAIN` in `deploy/config.env`:
+
+| `ORIGIN_CHAIN` | Chain ID | Callback proxy | Reactive faucet |
+|---|---|---|---|
+| `sepolia` (default) | 11155111 | `0xAa14d9Cd0f788Ca23d11805986C1d8bd035D23b4` | `0x9b9BB25f1A81078C544C829c5EB7822d747Cf434` |
+| `base-sepolia` | 84532 | `0x476F44b11F5C942c58f4c8E3d0300E5710743585` | `0x2afaFD298b23b62760711756088F75B7409f5967` |
+
+Both are Lasna-testnet origins/destinations; the Reactive contract subscribes with the selected chain ID.
 
 ## The AI is in the loop, not in the build
 
@@ -82,7 +91,7 @@ The model buys ~9 points of recall for ~0.6 points of extra false alarms. It is 
 src/
   PriceFeedOrigin.sol        origin event source
   SentinelReactive.sol       Lasna reactive contract
-  SentinelVault.sol          Base Sepolia destination + policy
+  SentinelVault.sol          origin/destination chain + policy
   lib/SentinelFeatures.sol   integer feature extraction
   lib/SentinelModel.sol      generated integer inference
   lib/ModelWeights.sol       generated quantised weights + hash
@@ -90,6 +99,7 @@ test/
   Vault.t.sol                auth, score verification, hysteresis, fallback
   Reactive.t.sol             subscriptions, feature window, replay, timeout
   E2E.t.sol                  calm → crash → recovery, full two-hop loop
+  SepoliaPath.t.sol          same suites on Ethereum Sepolia + its proxy
   generated/                 80 model vectors + 76 feature vectors from Python
 training/
   generate_data.py           regime-switching synthetic paths
@@ -101,7 +111,7 @@ agent/
   model.py                   integer inference, identical to Solidity
   agent.py                   event watcher, idempotent submitter, audit log
 deploy/
-  deploy.sh                  Base Sepolia + Lasna deployment, preflight, JSON record
+  deploy.sh                  Sepolia or Base Sepolia + Lasna deployment, preflight, JSON record
 demo/
   publish.sh                 publishes the 21-tick demo path
   monitor.py                 terminal dashboard
@@ -120,7 +130,7 @@ Requirements: Foundry, Python 3.11+, Node not required.
 
 ```bash
 # contracts
-forge test                      # 19 tests, including cross-language parity
+forge test                      # 36 tests: both chains + cross-language parity
 forge test --match-contract E2ETest -vvv
 
 # python environment
@@ -140,18 +150,22 @@ python3 -m venv .venv && .venv/bin/pip install -r requirements.txt
 The full two-hop loop can be rehearsed on Anvil with a mock system contract and a mock callback proxy. This is for validation and video practice only; the addresses and hashes are local and must not be submitted as evidence.
 
 ```bash
-./demo/local_demo.sh            # deploys on Anvil, then runs 21 ticks + agent + relay
+./demo/local_demo.sh                          # Ethereum Sepolia chain id
+ORIGIN_CHAIN=base-sepolia ./demo/local_demo.sh  # Base Sepolia variant
 ```
+
+The Sepolia and Base variants use their respective chain IDs and callback-proxy addresses; the mock proxy's calldata injection is identical.
 
 Expected: score 0 while the window fills, 4768 at tick 6, `DEFENSIVE` at tick 8 (8118), back to `NORMAL` at tick 18 (4790). `docs/test-output.txt` shows the Foundry version of the same path.
 
 ## Deploy and run
 
-Deployment is **testnet only** and costs $0 in real funds; it needs Base Sepolia ETH from a faucet, which is also the input to the official Reactive faucet (1 ETH → 100 lREACT). See `docs/DEPLOY_RUNBOOK.md`.
+Deployment is **testnet only** and costs $0 in real funds; it needs Sepolia ETH from a faucet, which is also the input to the official Reactive faucet (1 ETH → 100 lREACT; **0.01 SepETH → 1 lREACT** is enough, keep the rest for gas). The default is Ethereum Sepolia; `ORIGIN_CHAIN=base-sepolia` switches the whole path. See `docs/DEPLOY_RUNBOOK.md`.
 
 ```bash
 cp deploy/config.env.example deploy/config.env
-# fill RPCs, OWNER, and one auth method; never commit this file
+# ORIGIN_CHAIN=sepolia, RPC_ORIGIN, OWNER, and one auth method
+# never commit this file
 ./deploy/deploy.sh --dry-run
 ./deploy/deploy.sh
 
@@ -168,9 +182,9 @@ cp deploy/config.env.example deploy/config.env
 
 | Item | Value |
 |---|---|
-| PriceFeedOrigin (84532) | _pending_ |
+| PriceFeedOrigin (11155111) | _pending_ |
 | SentinelReactive (5318007) | _pending_ |
-| SentinelVault (84532) | _pending_ |
+| SentinelVault (11155111) | _pending_ |
 | Origin tick tx | _pending_ |
 | Reactive inference tx | _pending_ |
 | Inference request callback tx | _pending_ |
@@ -179,7 +193,7 @@ cp deploy/config.env.example deploy/config.env
 | Policy callback tx (mode change) | _pending_ |
 | Model hash | `0x671b59e6a51dddd6ef2900c996807258f1a783a58ceff12ed5fe538af3d403e9` |
 
-The exact evidence table and Basescan/Reactscan link format are in `docs/SUBMISSION_CHECKLIST.md`.
+The exact evidence table and Etherscan/Reactscan link format are in `docs/SUBMISSION_CHECKLIST.md`.
 
 ## Limitations and production path
 

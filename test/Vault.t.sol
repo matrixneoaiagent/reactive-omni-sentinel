@@ -10,12 +10,12 @@ contract VaultTest is BaseTest {
     address internal constant ALICE = address(0xA1);
 
     function _request(uint256 id, int256[6] memory f) internal {
-        vm.prank(PROXY_ADDR);
+        vm.prank(proxy);
         vault.requestRiskAssessment(address(reactive), id, f);
     }
 
     function _apply(uint256 id) internal {
-        vm.prank(PROXY_ADDR);
+        vm.prank(proxy);
         vault.applyPolicy(address(reactive), id);
     }
 
@@ -32,11 +32,11 @@ contract VaultTest is BaseTest {
         vm.expectRevert();
         vault.requestRiskAssessment(address(reactive), 1, f);
 
-        vm.prank(PROXY_ADDR);
+        vm.prank(proxy);
         vm.expectRevert();
         vault.requestRiskAssessment(address(0xBAD), 1, f);
 
-        vm.prank(PROXY_ADDR);
+        vm.prank(proxy);
         vault.requestRiskAssessment(address(reactive), 1, f);
 
         (uint256 tickId, int256[6] memory got, uint64 at, bool scored, bool applied) =
@@ -142,7 +142,7 @@ contract VaultTest is BaseTest {
         _request(7, calmFeatures());
         vm.warp(block.timestamp + 181);
 
-        vm.prank(PROXY_ADDR);
+        vm.prank(proxy);
         vault.applyFallback(address(reactive), 7);
         assertEq(uint8(vault.mode()), uint8(SentinelVault.Mode.DEFENSIVE));
 
@@ -161,7 +161,7 @@ contract VaultTest is BaseTest {
         vault.submitRiskScore(1, s, SentinelModel.MODEL_HASH);
         _apply(1);
 
-        vm.prank(PROXY_ADDR);
+        vm.prank(proxy);
         vm.expectRevert(abi.encodeWithSelector(SentinelVault.AlreadyApplied.selector, 1));
         vault.applyPolicy(address(reactive), 1);
     }

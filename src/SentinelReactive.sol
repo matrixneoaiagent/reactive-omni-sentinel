@@ -7,7 +7,7 @@ import { AbstractReactive } from "reactive-lib/base/AbstractReactive.sol";
 import { SentinelFeatures } from "./lib/SentinelFeatures.sol";
 
 /// @title SentinelReactive
-/// @notice Lives on Reactive Lasna.  Watches price ticks on Base Sepolia,
+/// @notice Lives on Reactive Lasna.  Watches price ticks on the origin chain,
 ///         turns the last eight into model features, asks the vault for an AI
 ///         assessment, then applies the resulting policy with a second
 ///         callback.  If the agent misses its deadline, it applies a

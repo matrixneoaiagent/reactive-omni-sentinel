@@ -6,7 +6,7 @@ import { AbstractCallback } from "reactive-lib/base/AbstractCallback.sol";
 import { SentinelModel } from "./lib/SentinelModel.sol";
 
 /// @title SentinelVault
-/// @notice A small Base Sepolia vault whose risk posture is set by a neural
+/// @notice A small vault on the origin/destination chain whose risk posture is set by a neural
 ///         network.  The agent supplies a score, but the vault recomputes the
 ///         inference from the committed weights and rejects anything that does
 ///         not match -- the AI is trusted for liveness, not for honesty.

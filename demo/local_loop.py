@@ -66,13 +66,15 @@ def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("cmd", choices=["tick", "relay", "status"])
     ap.add_argument("arg", nargs="?")
-    ap.add_argument("--rpc", default="http://127.0.0.1:8547")
+    ap.add_argument("--rpc", default=None)
     ap.add_argument("--addresses", default="/tmp/opencode/reactive-local.json")
     ap.add_argument("--from", dest="sender", default=None)
     args = ap.parse_args()
 
     addrs = json.loads(Path(args.addresses).read_text())
-    w3 = Web3(Web3.HTTPProvider(args.rpc, request_kwargs={"timeout": 30}))
+    rpc = args.rpc or addrs.get("rpc") or "http://127.0.0.1:8549"
+    chain_id = int(addrs.get("chain_id", 11155111))
+    w3 = Web3(Web3.HTTPProvider(rpc, request_kwargs={"timeout": 30}))
     sender = Web3.to_checksum_address(args.sender or w3.eth.accounts[0])
     feed = w3.eth.contract(address=Web3.to_checksum_address(addrs["feed"]), abi=ABI)
     reactive_addr = Web3.to_checksum_address(addrs["reactive"])
@@ -84,6 +86,7 @@ def main() -> None:
 
     if args.cmd == "status":
         print(json.dumps({
+            "chain_id": chain_id,
             "mode": "NORMAL" if vault.functions.mode().call() == 0 else "DEFENSIVE",
             "score": vault.functions.riskScoreBps().call(),
             "last_request": vault.functions.lastRequestId().call(),
@@ -98,7 +101,7 @@ def main() -> None:
         tick_id = feed.functions.tickId().call()
         block = w3.eth.get_block(rc.blockNumber)
         log = (
-            84532,
+            chain_id,
             feed.address,
             int(PRICE_TOPIC, 16),
             tick_id,
@@ -124,7 +127,7 @@ def main() -> None:
         a = e["args"]
         data = encode(["uint16", "bytes32", "address"], [a["scoreBps"], a["modelHash"], a["agent"]])
         log = (
-            84532,
+            chain_id,
             vault_addr,
             int(SCORE_TOPIC, 16),
             a["requestId"],

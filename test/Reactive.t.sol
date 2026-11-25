@@ -18,8 +18,20 @@ contract ReactiveTest is BaseTest {
     function test_subscriptions() public view {
         // price feed subscription in the constructor + vault subscription
         assertEq(sys.subscribeCount(), 2);
+        assertEq(sys.subscriptionCount(), 2);
         assertEq(reactive.owner(), address(this));
         assertEq(reactive.vault(), address(vault));
+        assertEq(address(vault._SERVICE_PROVIDER()), proxy);
+
+        MockSystem.Subscription memory priceSub = sys.subscriptionAt(0);
+        assertEq(priceSub.chainId, originChain);
+        assertEq(priceSub.contractAddress, address(feed));
+        assertEq(priceSub.topic0, reactive.PRICE_TICK_TOPIC0());
+
+        MockSystem.Subscription memory scoreSub = sys.subscriptionAt(1);
+        assertEq(scoreSub.chainId, originChain);
+        assertEq(scoreSub.contractAddress, address(vault));
+        assertEq(scoreSub.topic0, reactive.RISK_SCORE_TOPIC0());
     }
 
     function test_reactIsSystemOnly() public {
@@ -49,7 +61,7 @@ contract ReactiveTest is BaseTest {
 
         assertEq(sys.callCount(), 1);
         MockSystem.Call memory c = sys.lastCall();
-        assertEq(c.chainId, BASE_SEPOLIA);
+        assertEq(c.chainId, originChainId());
         assertEq(c.recipient, address(vault));
         assertEq(bytes4(c.payload), REQUEST_SELECTOR);
         assertGe(c.gasLimit, 100_000);
@@ -91,7 +103,7 @@ contract ReactiveTest is BaseTest {
         // replay tick 6 exactly
         uint256 price = 2000e8 + 5e8;
         IReactive.LogRecord memory log_ = IReactive.LogRecord({
-            chainId: BASE_SEPOLIA,
+            chainId: originChain,
             contractAddress: address(feed),
             topic0: reactive.PRICE_TICK_TOPIC0(),
             topic1: 6,
@@ -119,7 +131,7 @@ contract ReactiveTest is BaseTest {
 
         uint16 score = vault.riskScoreBps();
         IReactive.LogRecord memory log_ = IReactive.LogRecord({
-            chainId: BASE_SEPOLIA,
+            chainId: originChain,
             contractAddress: address(vault),
             topic0: reactive.RISK_SCORE_TOPIC0(),
             topic1: 5,
