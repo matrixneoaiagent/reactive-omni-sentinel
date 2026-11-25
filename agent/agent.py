@@ -154,13 +154,6 @@ class Agent:
 
     # ------------------------------------------------------------------ #
     def fetch(self, from_block: int, to_block: int):
-        # Public RPCs are load-balanced and their heads can move backwards
-        # between the run-loop read and this call; never ask for a block past
-        # the head this connection currently sees.
-        head = self.w3.eth.block_number
-        if from_block > head:
-            return []
-        to_block = min(to_block, head)
         topic0 = self.vault.events.RiskAssessmentRequested().topic
         return self.w3.eth.get_logs(
             {
@@ -263,7 +256,9 @@ class Agent:
         )
 
         while self.running:
-            latest = self.w3.eth.block_number
+            # Public RPCs are load-balanced; keep a safety margin so a node
+            # with a slightly lower head never rejects the log range.
+            latest = max(0, self.w3.eth.block_number - 10)
             if latest >= self.state.last_block:
                 start = self.state.last_block
                 while start <= latest:
