@@ -30,8 +30,8 @@ contract SentinelReactive is AbstractReactive {
     address public immutable owner;
 
     address public vault;
-    uint64 public inferenceGasLimit = 500_000;
-    uint64 public policyGasLimit = 300_000;
+    uint64 public inferenceGasLimit = 1_500_000;
+    uint64 public policyGasLimit = 1_200_000;
     uint256 public fallbackDelay = 180;
     uint256 public lastPriceTickId;
     uint256 public lastAppliedRequestId;
