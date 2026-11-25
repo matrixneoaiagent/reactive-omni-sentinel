@@ -161,7 +161,7 @@ This is exactly what `test/mocks/MockReactive.sol::MockProxy` does, which is why
 
 - **Reactive side:** `react()` writes a few storage slots and computes 6 features plus ~56 multiplications. A 900k gas cap is comfortable. The contract pays in lREACT from reserves; fund with `SYSTEM.depositTo(reactive)`.
 - **Destination side:** each callback is charged to the vault in origin-chain ETH. `depositTo(vault)` on the callback proxy creates reserves. 0.005 ETH is enough for hundreds of callbacks at testnet gas prices.
-- **Callback gas limits:** 500k for `requestRiskAssessment`, 300k for `applyPolicy`/`applyFallback`. The proxy withholds overhead, so the effective limit is lower; both functions are well under 200k in tests.
+- **Callback gas limits:** 1.5M for `requestRiskAssessment`, 1.2M for `applyPolicy`/`applyFallback`. The proxy withholds overhead, so the effective limit is lower; both functions are well under 200k in tests. The higher limits leave headroom for destination-chain gas accounting and future feature reads without changing the contracts.
 - **Agent:** pays ordinary origin-chain gas for one `submitRiskScore` per request (~62–120k gas).
 
 ## Deployment order (circular dependency)

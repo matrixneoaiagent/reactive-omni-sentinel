@@ -1,21 +1,5 @@
 No files changed, compilation skipped
 
-Ran 9 tests for test/Reactive.t.sol:ReactiveTest
-[PASS] test_currentFeatures() (gas: 873864)
-[PASS] test_duplicateTickIsIgnored() (gas: 847930)
-[PASS] test_fallbackWhenAgentIsSilent() (gas: 1461078)
-[PASS] test_firstFiveTicksDoNotCallback() (gas: 292373)
-[PASS] test_reactIsSystemOnly() (gas: 9670)
-[PASS] test_scoreTriggersPolicyCallback() (gas: 1085054)
-[PASS] test_sixthTickRequestsInference() (gas: 855958)
-[PASS] test_staleScoreIsIgnored() (gas: 926660)
-[PASS] test_subscriptions() (gas: 62334)
-Suite result: ok. 9 passed; 0 failed; 0 skipped; finished in 12.43ms (11.34ms CPU time)
-
-Ran 1 test for test/generated/ModelParity.t.sol:ModelParityTest
-[PASS] test_generated_vectors() (gas: 824885)
-Suite result: ok. 1 passed; 0 failed; 0 skipped; finished in 15.34ms (13.98ms CPU time)
-
 Ran 6 tests for test/SepoliaPath.t.sol:SepoliaVaultTest
 [PASS] test_constructorWiring() (gas: 9949)
 [PASS] test_doubleApplyReverts() (gas: 297784)
@@ -23,21 +7,7 @@ Ran 6 tests for test/SepoliaPath.t.sol:SepoliaVaultTest
 [PASS] test_hysteresisAndDepositGate() (gas: 1021368)
 [PASS] test_requestRequiresProxyAndReactive() (gas: 230176)
 [PASS] test_scoreMustEqualOnchainInference() (gas: 311452)
-Suite result: ok. 6 passed; 0 failed; 0 skipped; finished in 4.28ms (2.55ms CPU time)
-
-Ran 2 tests for test/SepoliaPath.t.sol:SepoliaE2ETest
-[PASS] test_everyRequestIsAnsweredExactlyOnce() (gas: 2409846)
-[PASS] test_storyFullLoop() (gas: 10765368)
-Suite result: ok. 2 passed; 0 failed; 0 skipped; finished in 19.86ms (18.59ms CPU time)
-
-Ran 6 tests for test/Vault.t.sol:VaultTest
-[PASS] test_constructorWiring() (gas: 9949)
-[PASS] test_doubleApplyReverts() (gas: 297784)
-[PASS] test_fallbackGoesDefensiveWithoutScore() (gas: 262321)
-[PASS] test_hysteresisAndDepositGate() (gas: 1021368)
-[PASS] test_requestRequiresProxyAndReactive() (gas: 230176)
-[PASS] test_scoreMustEqualOnchainInference() (gas: 311452)
-Suite result: ok. 6 passed; 0 failed; 0 skipped; finished in 3.50ms (2.57ms CPU time)
+Suite result: ok. 6 passed; 0 failed; 0 skipped; finished in 6.34ms (5.42ms CPU time)
 
 Ran 9 tests for test/SepoliaPath.t.sol:SepoliaReactiveTest
 [PASS] test_currentFeatures() (gas: 873864)
@@ -49,15 +19,45 @@ Ran 9 tests for test/SepoliaPath.t.sol:SepoliaReactiveTest
 [PASS] test_sixthTickRequestsInference() (gas: 855958)
 [PASS] test_staleScoreIsIgnored() (gas: 926660)
 [PASS] test_subscriptions() (gas: 62334)
-Suite result: ok. 9 passed; 0 failed; 0 skipped; finished in 5.44ms (6.74ms CPU time)
+Suite result: ok. 9 passed; 0 failed; 0 skipped; finished in 9.53ms (8.52ms CPU time)
+
+Ran 6 tests for test/Vault.t.sol:VaultTest
+[PASS] test_constructorWiring() (gas: 9949)
+[PASS] test_doubleApplyReverts() (gas: 297784)
+[PASS] test_fallbackGoesDefensiveWithoutScore() (gas: 262321)
+[PASS] test_hysteresisAndDepositGate() (gas: 1021368)
+[PASS] test_requestRequiresProxyAndReactive() (gas: 230176)
+[PASS] test_scoreMustEqualOnchainInference() (gas: 311452)
+Suite result: ok. 6 passed; 0 failed; 0 skipped; finished in 8.62ms (6.79ms CPU time)
+
+Ran 2 tests for test/SepoliaPath.t.sol:SepoliaE2ETest
+[PASS] test_everyRequestIsAnsweredExactlyOnce() (gas: 2409846)
+[PASS] test_storyFullLoop() (gas: 10765368)
+Suite result: ok. 2 passed; 0 failed; 0 skipped; finished in 19.24ms (18.00ms CPU time)
+
+Ran 1 test for test/generated/ModelParity.t.sol:ModelParityTest
+[PASS] test_generated_vectors() (gas: 824885)
+Suite result: ok. 1 passed; 0 failed; 0 skipped; finished in 8.38ms (8.03ms CPU time)
+
+Ran 9 tests for test/Reactive.t.sol:ReactiveTest
+[PASS] test_currentFeatures() (gas: 873864)
+[PASS] test_duplicateTickIsIgnored() (gas: 847930)
+[PASS] test_fallbackWhenAgentIsSilent() (gas: 1461078)
+[PASS] test_firstFiveTicksDoNotCallback() (gas: 292373)
+[PASS] test_reactIsSystemOnly() (gas: 9670)
+[PASS] test_scoreTriggersPolicyCallback() (gas: 1085054)
+[PASS] test_sixthTickRequestsInference() (gas: 855958)
+[PASS] test_staleScoreIsIgnored() (gas: 926660)
+[PASS] test_subscriptions() (gas: 62334)
+Suite result: ok. 9 passed; 0 failed; 0 skipped; finished in 8.34ms (9.19ms CPU time)
 
 Ran 2 tests for test/E2E.t.sol:E2ETest
 [PASS] test_everyRequestIsAnsweredExactlyOnce() (gas: 2409846)
 [PASS] test_storyFullLoop() (gas: 10765368)
-Suite result: ok. 2 passed; 0 failed; 0 skipped; finished in 26.51ms (25.40ms CPU time)
+Suite result: ok. 2 passed; 0 failed; 0 skipped; finished in 25.53ms (24.24ms CPU time)
 
 Ran 1 test for test/generated/FeatureParity.t.sol:FeatureParityTest
 [PASS] test_generated_vectors() (gas: 2002232)
-Suite result: ok. 1 passed; 0 failed; 0 skipped; finished in 14.40ms (13.12ms CPU time)
+Suite result: ok. 1 passed; 0 failed; 0 skipped; finished in 13.31ms (12.23ms CPU time)
 
-Ran 8 test suites in 32.02ms (101.76ms CPU time): 36 tests passed, 0 failed, 0 skipped (36 total tests)
+Ran 8 test suites in 33.45ms (99.30ms CPU time): 36 tests passed, 0 failed, 0 skipped (36 total tests)
