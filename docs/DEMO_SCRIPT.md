@@ -106,7 +106,7 @@ forge test --match-test test_fallbackWhenAgentIsSilent -vv
 
 **On screen:** README top, repo URL, model metrics table.
 
-**Voice:** "Sentinel is open source, runs on Ethereum Sepolia and Reactive Lasna, and the full loop is covered by 36 tests across both chain variants, including cross-language parity between Python and Solidity. Repo and transactions are in the submission. Thanks."
+**Voice:** "Sentinel is open source, runs on Ethereum Sepolia and Reactive Lasna, and the full loop is covered by 38 tests across both chain variants, including cross-language parity between Python and Solidity. Repo and transactions are in the submission. Thanks."
 
 ## Contingencies
 

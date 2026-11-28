@@ -8,7 +8,7 @@ No keys were used, no funds were spent, and nothing was deployed to a public net
 `forge test` runs the same suites twice: Base Sepolia (84532) and Ethereum Sepolia (11155111), plus the chain-agnostic parity tests.
 
 ```
-36 tests passed, 0 failed
+38 tests passed, 0 failed
   ReactiveTest            9  Base Sepolia
   VaultTest               6  Base Sepolia
   E2ETest                 2  Base Sepolia

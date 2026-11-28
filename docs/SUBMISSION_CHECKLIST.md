@@ -57,7 +57,7 @@ The minimum the form asks for is "a few transaction hashes showing the full loop
 | **Execution** | Rows 5–10 show the origin event, the reactive tx, the first callback, the agent tx, the second reactive tx, and the policy callback. `forge test` shows the same loop deterministically. |
 | **Integration** | The reactive contract computes the features, decides when to ask for inference, routes the score, and owns the policy callback. The AI is not a bolt-on: `SentinelModel` is part of the vault's verification path. |
 | **Usefulness** | A vault guard that distinguishes a noisy dip from a regime change; deposits are blocked only while the model sees stress, and withdrawals always work. Fallback covers agent downtime. |
-| **Craft** | 36 tests (both chains), cross-language parity vectors, generated weights with a committed hash, a deploy script with preflight and verification, a runbook, a model card with honest metrics, and a reproducible demo. |
+| **Craft** | 38 tests (both chains), cross-language parity vectors, generated weights with a committed hash, a deploy script with preflight and verification, a runbook, a model card with honest metrics, and a reproducible demo. |
 
 ## 5. Video checklist
 
